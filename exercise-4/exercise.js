@@ -3,6 +3,7 @@
 
 //Move the ball (the <circle>) to the top of the slide by setting
 //its `cx` attribute to 225 and its `cy` attribute to 95.
+
 d3.select('circle')
 	// .transition()
 	// .duration(1000)
@@ -12,9 +13,11 @@ d3.select('circle')
 
 //Add event listeners so that when the mouse is over the #cloud, it disappears
 //(reappearing when the mouse leaves).
+
 d3.select('#cloud').on('mouseover',function(){
 	d3.select(this).style('opacity',0)
 })
+
 
 
 
@@ -24,6 +27,7 @@ d3.select('#cloud').on('mouseover',function(){
 //on the selection to animate the ball!
 //You can call `duration()` after `transition()` to specify the speed in ms
 //(1000) looks good
+
 d3.select('circle').on('click',function(){
 	var cx = d3.select(this).attr('cx')
 	var cy = d3.select(this).attr('cy')
@@ -35,6 +39,7 @@ d3.select('circle').on('click',function(){
 	.attr('cy',95+320-cy)
 	
 })
+
 
 
 

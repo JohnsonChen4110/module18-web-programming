@@ -246,7 +246,7 @@ If you want to include HTML elements inside the new content, you should instead 
 
 ```js
 var paragraph = d3.select('p');
-paragraph.text('This is <em>new</em> content!');
+paragraph.html('This is <em>new</em> content!');
 ```
 
 will change the paragraph to display: "This is _new_ content!"
@@ -271,9 +271,9 @@ The `.attr()` method _returns_ a reference to the object that it modified. You c
 
 ```js
 var circle = d3.select('circle')  //no semicolon!
-    .attr('fill', 'green')  //call `.attr()` on (anonymous) result
-    .attr('stroke', 'yellow')  //call .attr() on (anonymous) result
-    .attr('stroke-width', 5);  //semi-colon when all done
+    .attr('fill', 'green')        //call `.attr()` on (anonymous) result
+    .attr('stroke', 'yellow')     //call `.attr() on (anonymous) result
+    .attr('stroke-width', 5);     //semi-colon when all done
 ```
 
 - The first `d3.select()` call returns a selection for a `<circle>` element, which we then call `.attr()` on to change its fill color. That method returns _the same_ circle element, which we then call `.attr()` to change its stroke color. _That_ method then returns the same circle element again, which call `.attr()` on a third time to change its stroke width. The third `.attr()` returns the same circle yet again, which is the ultimate result of this expression and so is assigned to the `circle` variable.
@@ -357,7 +357,7 @@ If we want to know more details about the event (e.g., where the user clicked wi
 
 Note that these event callback functions can occur repeatedly, over and over again (e.g., every time we click the button). This makes them potentially act a bit like the body of a `while` loop. However, because these callbacks are _functions_ any variables defined within them are **scoped** to that function, and will not be available on subsequent executions. Thus if you want to keep track of some additional information (e.g., how many times the button was clicked), you will need to use a **global** variable declared outside of the function. Such variables can be used to represent the **state** (situation) of the program, which can then be used to determine what behavior to perform when an event occurs, following the below pattern:
 
-```
+```swift
 # pseudocode
 WHEN an event occurs {
    check the STATE of the program;
@@ -369,20 +369,50 @@ WHEN an event occurs {
 For example:
 
 ```js
-var clickCount = 0; //keep track of the "state"
+var clickCount = 0;  //keep track of the "state"
 d3.select('button').on('click', function() {
-    if(clickCount > 10){ //decide what to do
+    if(clickCount > 10) {  //decide what to do
         console.log("I think you've had enough");
     }
     else {
-        clickCount++; //change state (+1)
+        clickCount++;  //change state (+1)
         console.log('You clicked me!');
     }
 });
 ```
 
 ## AJAX
-<!-- //what is it? Having our program send HTTP requests!
-//d3.json()
-//also d3.csv() !
-//note about needing to run a separate web server -->
+While normally HTTP requests for data are sent through the browser (by entering a URL in the address bar), it is also possible to use D3 to programmatically send HTTP requests, similar to what we did in Python.
+
+Having JavaScript code send an HTTP request is known as sending an [**AJAX**](https://webdesign.tutsplus.com/tutorials/an-introduction-to-ajax-for-front-end-designers--cms-25099) request. _AJAX_ is an acronym for **A**sychronous **J**avaScript **A**and **X**ML, and refers collectively to the techniques used to send these requests.
+
+- AJAX was developed by Microsoft in the late 1990s, and originally was used to send requests for XML data. However, in modern web programming most AJAX requests sent to web services are used to download JSON data instead. However, the AJAX name has stuck (rather than "AJAJ").
+
+The other important part of using AJAX requests is that they are **Asynchronous**. Downloading data from the internet can take a while (depending on the speed of the web server, the strength of the internet connection, etc). Rather than having the program "pause" and wait for this download to finish (as with _synchronous_ programming, like we did in Python), AJAX request will instead run _simultaneously_ with the rest of the code.
+
+- We call a function to send the AJAX request, but then our script _keeps going_&mdash;executing the next line of code while the request is processed by the server and the data downloads "in the background".
+- In order to deal with the response whenever it arrives, we specify a _callback function_. This callback will be executed once the data has finished downloading (conceptually similar to "when the 'response received' event occurs"). This callback function will be _passed_ the response's data for us to use.
+
+In order to send AJAX requests (for JSON data) using D3, we can use the `d3.json()` function. This function takes two parameters: the URI to query, and a callback to be executed once the response is received:
+
+```js
+var uri = 'https://api.spotify.com/v1/search?type=artist&q=bowie';
+
+//send query to uri, specify callback function
+d3.json(uri, function(data) {
+    console.log("Data recieved!");
+    console.log(data);
+});
+
+console.log('request sent');  //this statement will execute before data is received
+```
+
+- The callback function should take a single argument: the response's content in JSON format (that is, as a JavaScript object). Note that this content is extracted from the response "envelope" for us automatically.
+
+- Remember that the `d3.json()` function is _asynchronous_: the script will keep running (executing the next line) while the data downloads; the callback will be execute at an unspecified point in the future
+
+**Important note**: in many browsers, you will ___not___ be able to send an AJAX request when the web page is loading via the `file://` protocol (e.g., by double-clicking on the `.html` file). This is a security feature to keep you from accidentally running an HTML file that contains malicious JavaScript that will download a virus onto your computer.
+
+- Instead, you should run a local web server for testing AJAX requests, as described in the previous learning module.
+
+D3 also provides methods for sending AJAX requests that handle different data formats automatically. For example, `d3.csv()` will an array of object where each object's "keys" are based on the first (header) row in the CSV file. See the [d3.requests](https://github.com/d3/d3-request) module for details.
